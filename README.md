@@ -1,5 +1,5 @@
 # Claims Pipeline Monitor
-
+**[→ Live interactive demo](https://doyel-das.github.io/claims-pipeline-monitor)**
 ## What this is
 
 This is a tool that monitors outstanding insurance claims across a mental healthcare platform's billing pipeline. The platform connects patients, therapists, and insurance payors — a three-sided marketplace where the platform submits claims to insurance payors on behalf of therapy sessions. Claims go unpaid for all kinds of reasons: slow payors, denials, missing documentation, coding errors. Every uncollected claim is direct revenue sitting on the table. This tool identifies which claims need action and when, generates payor follow-up outreach calibrated to how long a claim has been outstanding, classifies denial reason codes and routes each denied claim to the correct automated resolution path, and surfaces only the genuinely complex cases to a human billing team. Built as a portfolio project to demonstrate AI operations and revenue cycle management thinking for healthcare platforms.
