@@ -38,7 +38,7 @@ claims-pipeline-monitor/
 
 1. Clone the repo:
    ```
-   git clone https://github.com/doyeldas97/claims-pipeline-monitor.git
+   git clone https://github.com/doyel-das/claims-pipeline-monitor.git
    cd claims-pipeline-monitor
    ```
 
