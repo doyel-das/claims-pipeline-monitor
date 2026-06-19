@@ -1,0 +1,8 @@
+.env
+__pycache__/
+*.pyc
+*.numbers
+.DS_Store
+claim_status.csv
+escalations.csv
+metrics_log.csv
