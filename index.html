@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Claims Pipeline Monitor</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.44.0/tabler-icons.min.css">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:system-ui,-apple-system,sans-serif;background:#f8f7f4;color:#1a1a19;min-height:100vh}
+.wrap{max-width:1100px;margin:0 auto;padding:2rem 1.5rem}
+.header{display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem}
+.header h1{font-size:20px;font-weight:500;color:#1a1a19}
+.header-right{font-size:13px;color:#888780}
+.tabs{display:flex;border-bottom:0.5px solid rgba(0,0,0,0.15);margin-bottom:1.5rem}
+.tab{padding:8px 20px;font-size:13px;font-weight:500;color:#888780;cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px;background:none;border-top:none;border-left:none;border-right:none}
+.tab:hover{color:#1a1a19}.tab.active{color:#1a1a19;border-bottom-color:#1a1a19}
+.page{display:none}.page.active{display:block}
+.tiles{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:10px;margin-bottom:1.5rem}
+.tile{background:#fff;border-radius:10px;padding:.875rem 1rem;cursor:pointer;border:2px solid transparent;transition:border-color .15s}
+.tile:hover{border-color:rgba(0,0,0,0.2)}.tile.active{border-color:#1a1a19}
+.tile-label{font-size:11px;color:#888780;margin-bottom:4px}
+.tile-amt{font-size:18px;font-weight:500;margin-bottom:2px}
+.tile-sub{font-size:11px;color:#888780}
+.cb{color:#185FA5}.cy{color:#BA7517}.co{color:#D85A30}.cr{color:#A32D2D}.cg{color:#3B6D11}
+.search-row{margin-bottom:1rem}
+.search-row input{width:100%;padding:8px 12px;font-size:13px;border:0.5px solid rgba(0,0,0,0.2);border-radius:8px;background:#fff;color:#1a1a19;outline:none}
+.table-wrap{background:#fff;border:0.5px solid rgba(0,0,0,0.12);border-radius:12px;overflow:hidden;margin-bottom:1rem}
+table{width:100%;border-collapse:collapse;font-size:13px;table-layout:fixed}
+th{background:#f8f7f4;padding:9px 12px;text-align:left;font-weight:500;font-size:12px;color:#888780;border-bottom:0.5px solid rgba(0,0,0,0.1);cursor:pointer;white-space:nowrap}
+th:hover{color:#1a1a19}
+td{padding:10px 12px;border-bottom:0.5px solid rgba(0,0,0,0.08);color:#1a1a19;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;vertical-align:middle}
+tr:last-child td{border-bottom:none}
+tbody tr{cursor:pointer}
+tbody tr:hover td{background:#f8f7f4}
+.badge{display:inline-block;padding:2px 9px;border-radius:20px;font-size:11px;font-weight:500}
+.b-blue{background:#E6F1FB;color:#0C447C}.b-yellow{background:#FAEEDA;color:#633806}.b-orange{background:#FAECE7;color:#4A1B0C}.b-red{background:#FCEBEB;color:#501313}.b-green{background:#EAF3DE;color:#27500A}.b-purple{background:#EEEDFE;color:#3C3489}
+.drawer{background:#fff;border:0.5px solid rgba(0,0,0,0.12);border-radius:12px;padding:1.25rem;margin-top:.75rem}
+.drawer-head{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:2px}
+.drawer-head h3{font-size:15px;font-weight:500;color:#1a1a19}
+.drawer-meta{font-size:12px;color:#888780;margin-bottom:1rem}
+.close-btn{background:none;border:none;cursor:pointer;color:#888780;font-size:18px;padding:0;line-height:1}
+.stats-row{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin-bottom:1.25rem}
+.stat{background:#f8f7f4;border-radius:8px;padding:10px 12px}
+.stat-label{font-size:11px;color:#888780;margin-bottom:4px}
+.stat-val{font-size:14px;font-weight:500;color:#1a1a19}
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:1.25rem}
+.sec-label{font-size:11px;font-weight:500;color:#888780;text-transform:uppercase;letter-spacing:.05em;margin-bottom:10px}
+.timeline{padding-left:18px;position:relative}
+.tl-item{position:relative;padding-bottom:14px}
+.tl-item:last-child{padding-bottom:0}
+.tl-item::before{content:'';position:absolute;left:-14px;top:5px;width:8px;height:8px;border-radius:50%;background:#ccc}
+.tl-item.tl-ai::before{background:#534AB7}.tl-item.tl-payor::before{background:#0F6E56}.tl-item.tl-human::before{background:#185FA5}.tl-item.tl-danger::before{background:#A32D2D}
+.tl-item::after{content:'';position:absolute;left:-11px;top:13px;width:2px;bottom:0;background:rgba(0,0,0,0.1)}
+.tl-item:last-child::after{display:none}
+.tl-date{font-size:11px;color:#888780;margin-bottom:2px}
+.tl-text{font-size:13px;color:#1a1a19}
+.tl-sub{font-size:12px;color:#888780;margin-top:2px;font-style:italic}
+.tl-tag{display:inline-block;font-size:10px;border-radius:20px;padding:1px 7px;margin-left:5px;vertical-align:middle}
+.tag-ai{background:#EEEDFE;color:#3C3489}.tag-payor{background:#E1F5EE;color:#085041}.tag-human{background:#E6F1FB;color:#0C447C}
+.msg-box{background:#f8f7f4;border-radius:8px;padding:12px;font-size:13px;line-height:1.65;color:#1a1a19;border-left:3px solid;white-space:pre-wrap}
+.msg-f1{border-color:#185FA5}.msg-f2{border-color:#BA7517}.msg-f3{border-color:#D85A30}.msg-denial{border-color:#A32D2D}.msg-partial{border-color:#534AB7}.msg-appeal{border-color:#A32D2D}
+.alert{border-radius:8px;padding:10px 12px;font-size:13px;margin-bottom:1rem;border-left:3px solid}
+.alert-danger{background:#FCEBEB;color:#501313;border-color:#A32D2D}
+.alert-warn{background:#FAEEDA;color:#633806;border-color:#EF9F27}
+.alert-ai{background:#EEEDFE;color:#3C3489;border-color:#534AB7}
+.denial-card{background:#f8f7f4;border-radius:8px;padding:12px;margin-bottom:1rem;border:0.5px solid rgba(0,0,0,0.1)}
+.denial-card h4{font-size:12px;font-weight:500;margin-bottom:8px}
+.denial-row{display:flex;justify-content:space-between;font-size:12px;padding:4px 0;border-bottom:0.5px solid rgba(0,0,0,0.08)}
+.denial-row:last-child{border-bottom:none}
+.denial-key{color:#888780}.denial-val{font-weight:500}
+.task-list{display:flex;flex-direction:column;gap:10px}
+.task-card{background:#fff;border:0.5px solid rgba(0,0,0,0.12);border-radius:12px;padding:1rem 1.25rem}
+.task-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:4px}
+.task-title{font-size:13px;font-weight:500}
+.task-meta{font-size:12px;color:#888780;margin-bottom:8px}
+.task-action{font-size:12px;color:#888780;background:#f8f7f4;border-radius:6px;padding:7px 10px;border-left:3px solid rgba(0,0,0,0.15)}
+.p-high{border-left:3px solid #A32D2D!important}.p-med{border-left:3px solid #D85A30!important}.p-low{border-left:3px solid #BA7517!important}
+.scale-card{background:#fff;border-radius:12px;padding:1rem 1.25rem;margin-bottom:10px;border:0.5px solid rgba(0,0,0,0.1)}
+.scale-card h4{font-size:13px;font-weight:500;margin-bottom:10px}
+.bar-wrap{display:flex;align-items:center;gap:10px;margin-bottom:7px}
+.bar-bg{flex:1;height:8px;background:rgba(0,0,0,0.08);border-radius:4px;overflow:hidden}
+.bar-fill{height:100%;border-radius:4px}
+.bar-label{font-size:12px;color:#888780;min-width:160px}
+.bar-pct{font-size:12px;font-weight:500;min-width:36px;text-align:right}
+.trend-hero{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin-bottom:1.5rem}
+.hero-card{background:#fff;border-radius:12px;padding:1rem 1.25rem;border:0.5px solid rgba(0,0,0,0.1)}
+.hero-label{font-size:11px;color:#888780;margin-bottom:6px}
+.hero-val{font-size:26px;font-weight:500;color:#1a1a19;margin-bottom:4px}
+.hero-delta{font-size:12px;font-weight:500}
+.delta-good{color:#3B6D11}
+.chart-grid{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1rem}
+.chart-card{background:#fff;border-radius:12px;padding:1.25rem;border:0.5px solid rgba(0,0,0,0.1)}
+.chart-card h4{font-size:13px;font-weight:500;margin-bottom:4px}
+.chart-sub{font-size:12px;color:#888780;margin-bottom:1rem}
+.chart-wrap{position:relative;height:140px}
+.insight-card{background:#fff;border-radius:12px;padding:1rem 1.25rem;margin-bottom:1rem;border:0.5px solid rgba(0,0,0,0.1)}
+.insight-card h4{font-size:13px;font-weight:500;margin-bottom:10px}
+.insight-row{display:flex;justify-content:space-between;align-items:flex-start;padding:8px 0;border-bottom:0.5px solid rgba(0,0,0,0.08);font-size:12px;gap:1rem}
+.insight-row:last-child{border-bottom:none}
+.insight-label{color:#888780;min-width:200px}
+.insight-val{color:#1a1a19;text-align:right}
+th:nth-child(1){width:10%}th:nth-child(2){width:16%}th:nth-child(3){width:14%}th:nth-child(4){width:9%}th:nth-child(5){width:10%}th:nth-child(6){width:14%}th:nth-child(7){width:27%}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="header">
+    <h1>Claims pipeline monitor</h1>
+    <div class="header-right">Last run: today, 6:00 AM &nbsp;·&nbsp; Grow Therapy Billing Ops &nbsp;·&nbsp; <a href="https://github.com/doyel-das/claims-pipeline-monitor" style="color:#185FA5;text-decoration:none">View on GitHub →</a></div>
+  </div>
+  <div class="tabs">
+    <button class="tab active" onclick="switchTab('pipeline',this)">Pipeline overview</button>
+    <button class="tab" onclick="switchTab('tasks',this)">My tasks <span style="background:#FCEBEB;color:#501313;font-size:10px;padding:1px 7px;border-radius:20px;margin-left:5px">7</span></button>
+    <button class="tab" onclick="switchTab('scale',this)">AI automation layer</button>
+    <button class="tab" onclick="switchTab('trends',this)">Trends</button>
+  </div>
+  <div id="page-pipeline" class="page active">
+    <div class="tiles">
+      <div class="tile active" onclick="setStage('all')" id="tile-all"><div class="tile-label">Total outstanding</div><div class="tile-amt cb" id="cnt-all">—</div><div class="tile-sub" id="sub-all">— claims</div></div>
+      <div class="tile" onclick="setStage('waiting')" id="tile-waiting"><div class="tile-label">Submitted — waiting</div><div class="tile-amt cb" id="cnt-waiting">—</div><div class="tile-sub" id="sub-waiting">— claims</div></div>
+      <div class="tile" onclick="setStage('followup')" id="tile-followup"><div class="tile-label">In follow-up</div><div class="tile-amt cy" id="cnt-followup">—</div><div class="tile-sub" id="sub-followup">— claims</div></div>
+      <div class="tile" onclick="setStage('denied')" id="tile-denied"><div class="tile-label">Denied — in resolution</div><div class="tile-amt co" id="cnt-denied">—</div><div class="tile-sub" id="sub-denied">— claims</div></div>
+      <div class="tile" onclick="setStage('escalated')" id="tile-escalated"><div class="tile-label">Escalated</div><div class="tile-amt cr" id="cnt-escalated">—</div><div class="tile-sub" id="sub-escalated">— claims</div></div>
+    </div>
+    <div class="search-row"><input type="text" id="search" placeholder="Search by claim ID, provider, or payor..." oninput="render()"></div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr>
+          <th onclick="sort('claim_id')">Claim ID</th>
+          <th onclick="sort('provider_name')">Provider</th>
+          <th onclick="sort('payor_name')">Payor</th>
+          <th onclick="sort('amount')">Amount</th>
+          <th onclick="sort('days_outstanding')">Days out</th>
+          <th onclick="sort('stage')">Stage</th>
+          <th onclick="sort('outreach_status')">AI outreach status</th>
+        </tr></thead>
+        <tbody id="tbody"></tbody>
+      </table>
+    </div>
+    <div id="drawer" style="display:none"></div>
+  </div>
+  <div id="page-tasks" class="page">
+    <div style="font-size:13px;color:#888780;margin-bottom:1rem">7 items need your attention today. All other claims are being monitored and followed up automatically.</div>
+    <div class="task-list" id="task-list"></div>
+  </div>
+  <div id="page-scale" class="page">
+    <div style="font-size:13px;color:#888780;margin-bottom:1.25rem">How the system handles thousands of claims without proportional human effort.</div>
+    <div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:1rem;margin-bottom:1.25rem">
+      <div class="stat"><div class="stat-label">Claims monitored automatically</div><div class="stat-val" style="font-size:20px">4,847</div></div>
+      <div class="stat"><div class="stat-label">Resolved without human (last 30d)</div><div class="stat-val" style="font-size:20px;color:#3B6D11">1,203</div></div>
+      <div class="stat"><div class="stat-label">Required human intervention</div><div class="stat-val" style="font-size:20px;color:#A32D2D">89</div></div>
+    </div>
+    <div class="scale-card"><h4>Payor data ingestion — how denials and payments come in</h4>
+      <div class="bar-wrap"><div class="bar-label">835 remittance file (structured)</div><div class="bar-bg"><div class="bar-fill" style="width:54%;background:#3B6D11"></div></div><div class="bar-pct">54%</div></div>
+      <div class="bar-wrap"><div class="bar-label">Payor portal API</div><div class="bar-bg"><div class="bar-fill" style="width:23%;background:#3B6D11"></div></div><div class="bar-pct">23%</div></div>
+      <div class="bar-wrap"><div class="bar-label">RPA portal scraping</div><div class="bar-bg"><div class="bar-fill" style="width:14%;background:#BA7517"></div></div><div class="bar-pct">14%</div></div>
+      <div class="bar-wrap"><div class="bar-label">Manual portal check</div><div class="bar-bg"><div class="bar-fill" style="width:9%;background:#A32D2D"></div></div><div class="bar-pct">9%</div></div>
+    </div>
+    <div class="scale-card"><h4>Denial classification — automated routing by denial code</h4>
+      <div class="bar-wrap"><div class="bar-label">Coding error → auto-corrected claim</div><div class="bar-bg"><div class="bar-fill" style="width:31%;background:#3B6D11"></div></div><div class="bar-pct">31%</div></div>
+      <div class="bar-wrap"><div class="bar-label">Missing docs → auto-request</div><div class="bar-bg"><div class="bar-fill" style="width:24%;background:#3B6D11"></div></div><div class="bar-pct">24%</div></div>
+      <div class="bar-wrap"><div class="bar-label">Eligibility issue → patient notice</div><div class="bar-bg"><div class="bar-fill" style="width:18%;background:#3B6D11"></div></div><div class="bar-pct">18%</div></div>
+      <div class="bar-wrap"><div class="bar-label">Timely filing → appeal drafted</div><div class="bar-bg"><div class="bar-fill" style="width:11%;background:#BA7517"></div></div><div class="bar-pct">11%</div></div>
+      <div class="bar-wrap"><div class="bar-label">Complex / unknown → human queue</div><div class="bar-bg"><div class="bar-fill" style="width:16%;background:#A32D2D"></div></div><div class="bar-pct">16%</div></div>
+    </div>
+    <div class="scale-card"><h4>AI outreach sequence — what happens automatically</h4>
+      <div class="timeline" style="margin-top:8px">
+        <div class="tl-item tl-ai"><div class="tl-date">Day 30 — claim aging threshold</div><div class="tl-text">AI sends first follow-up to payor <span class="tl-tag tag-ai">AI</span></div><div class="tl-sub">Professional, neutral tone. Claim ID, billed amount, submission date. Template 1.</div></div>
+        <div class="tl-item tl-ai"><div class="tl-date">Day 45 — no payment received</div><div class="tl-text">AI sends second follow-up, firmer tone <span class="tl-tag tag-ai">AI</span></div><div class="tl-sub">References prior outreach. Requests status within 10 business days. Template 2.</div></div>
+        <div class="tl-item tl-ai"><div class="tl-date">Day 60 — still no payment</div><div class="tl-text">AI references prompt payment law <span class="tl-tag tag-ai">AI</span></div><div class="tl-sub">State-specific statute cited. Signals escalation is coming. Template 3.</div></div>
+        <div class="tl-item tl-payor"><div class="tl-date">Denial received via 835 / API / RPA</div><div class="tl-text">System reads denial code automatically <span class="tl-tag tag-payor">data ingestion</span></div><div class="tl-sub">No human reads EOB. Code extracted, claim routed to correct resolution path immediately.</div></div>
+        <div class="tl-item tl-ai"><div class="tl-date">Denial classified — known code</div><div class="tl-text">AI generates correction or documentation request <span class="tl-tag tag-ai">AI</span></div><div class="tl-sub">Template selected based on denial code. Variables populated. Resubmission drafted.</div></div>
+        <div class="tl-item tl-human"><div class="tl-date">Day 90+ or complex denial</div><div class="tl-text">Enters human task queue <span class="tl-tag tag-human">human required</span></div><div class="tl-sub">Full context assembled. Dollar amount, history, recommended action pre-populated.</div></div>
+      </div>
+    </div>
+  </div>
+  <div id="page-trends" class="page">
+    <div style="font-size:13px;color:#888780;margin-bottom:1.25rem">Six-month view — January through June 2026. Process metrics that signal system performance, not just outcomes.</div>
+    <div class="trend-hero">
+      <div class="hero-card"><div class="hero-label">Dollars recovered this month</div><div class="hero-val">$287K</div><div class="hero-delta delta-good">▲ +34% vs Jan</div></div>
+      <div class="hero-card"><div class="hero-label">Follow-up trigger rate</div><div class="hero-val">98%</div><div class="hero-delta delta-good">▲ from 61% in Jan</div></div>
+      <div class="hero-card"><div class="hero-label">Avg days to first follow-up</div><div class="hero-val">0.4d</div><div class="hero-delta delta-good">▼ from 11d in Jan</div></div>
+      <div class="hero-card"><div class="hero-label">Resubmission success rate</div><div class="hero-val">71%</div><div class="hero-delta delta-good">▲ from 54% in Jan</div></div>
+    </div>
+    <div class="chart-grid">
+      <div class="chart-card"><h4>Dollars recovered per month</h4><div class="chart-sub">Total $ collected from claims that entered the follow-up queue</div><div class="chart-wrap"><canvas id="c1"></canvas></div></div>
+      <div class="chart-card"><h4>Follow-up trigger rate</h4><div class="chart-sub">% of aging claims that triggered automatic outreach</div><div class="chart-wrap"><canvas id="c2"></canvas></div></div>
+    </div>
+    <div class="chart-grid">
+      <div class="chart-card"><h4>Resubmission success vs denial rate</h4><div class="chart-sub">Denial rate up but resubmission success also up = system working</div><div class="chart-wrap"><canvas id="c3"></canvas></div></div>
+      <div class="chart-card"><h4>Human queue vs claims processed</h4><div class="chart-sub">Queue stays flat as volume grows — the scalability proof</div><div class="chart-wrap"><canvas id="c4"></canvas></div></div>
+    </div>
+    <div class="insight-card"><h4>What the trends are telling us</h4>
+      <div class="insight-row"><div class="insight-label">Follow-up trigger rate: 61% → 98%</div><div class="insight-val" style="color:#3B6D11">The most important signal. In January 39% of aging claims got no follow-up. Now 98% trigger automatically same day.</div></div>
+      <div class="insight-row"><div class="insight-label">Days to first follow-up: 11d → 0.4d</div><div class="insight-val" style="color:#3B6D11">Claims followed up within hours of hitting the 30-day threshold.</div></div>
+      <div class="insight-row"><div class="insight-label">Denial rate up slightly (14% → 17%)</div><div class="insight-val" style="color:#BA7517">Worth monitoring. Could reflect payor behavior or better visibility. Not a system failure signal on its own.</div></div>
+      <div class="insight-row"><div class="insight-label">Resubmission success: 54% → 71%</div><div class="insight-val" style="color:#3B6D11">Faster denial classification means faster resubmission. Payors more likely to pay when it arrives quickly.</div></div>
+      <div class="insight-row"><div class="insight-label">$287K recovered in June vs $214K in Jan</div><div class="insight-val" style="color:#3B6D11">+$73K/month. At this trajectory: ~$876K additional annual revenue from the same claim volume.</div></div>
+    </div>
+  </div>
+</div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<script>
+const CLAIMS=[{id:'CLM-4401',provider_name:'Dr. Sarah Chen',payor_name:'Aetna',payor_type:'api',amount:320,days_outstanding:34,stage:'followup',outreach_status:'followup1',denial_code:null,denial_category:null,partial_paid:null,comms:[{date:'2026-06-10',type:'ai',text:'Claim hit 30-day threshold — first follow-up sent to Aetna',sub:'Template 1: Professional, neutral. Claim ID, amount, submission date.'}],msg_type:'f1',msg:'Dear Aetna Claims Department,\n\nWe are following up on claim CLM-4401 submitted on 2026-05-07 for services rendered on 2026-05-05 by Dr. Sarah Chen (NPI: 1234567890). The billed amount of $320.00 remains outstanding.\n\nPlease confirm receipt and provide an estimated payment timeline or any additional information needed to process this claim.\n\nReference: CLM-4401 | DOS: 2026-05-05\n\nGrow Therapy Billing Team'},{id:'CLM-4312',provider_name:'Dr. Marcus Webb',payor_name:'BCBS Texas',payor_type:'835',amount:275,days_outstanding:52,stage:'followup',outreach_status:'followup2',denial_code:null,denial_category:null,partial_paid:null,comms:[{date:'2026-05-24',type:'ai',text:'First follow-up sent to BCBS Texas',sub:'Template 1 — 30 days outstanding'},{date:'2026-06-07',type:'ai',text:'Second follow-up sent — no response after 14 days',sub:'Template 2: Firmer tone, requests status within 10 business days'}],msg_type:'f2',msg:'Dear BCBS Texas Claims Department,\n\nThis is a follow-up to our previous inquiry regarding claim CLM-4312 (DOS: 2026-04-23, billed amount: $275.00). We have not received payment or a response to our prior outreach dated 2026-05-24.\n\nPlease provide a status update or remittance within 10 business days.\n\nGrow Therapy Billing Team'},{id:'CLM-4198',provider_name:'Dr. Priya Nair',payor_name:'United Healthcare',payor_type:'api',amount:415,days_outstanding:67,stage:'followup',outreach_status:'followup3',denial_code:null,denial_category:null,partial_paid:null,comms:[{date:'2026-04-25',type:'ai',text:'First follow-up sent',sub:'Template 1'},{date:'2026-05-10',type:'ai',text:'Second follow-up sent',sub:'Template 2'},{date:'2026-05-25',type:'ai',text:'Third follow-up sent — prompt payment law cited',sub:'TX prompt payment statute cited. Signals escalation.'}],msg_type:'f3',msg:'Dear United Healthcare Claims Department,\n\nClaim CLM-4198 for services rendered on 2026-04-09 has been outstanding for 67 days without payment or explanation. This is our third follow-up.\n\nUnder Texas prompt payment regulations, clean claims are payable within 30 days of receipt. We request immediate payment or a formal explanation of any pending status.\n\nIf we do not receive a response within 5 business days we will escalate this matter accordingly.\n\nGrow Therapy Billing Team'},{id:'CLM-4087',provider_name:'Dr. James Okafor',payor_name:'Medicaid FL',payor_type:'rpa',amount:180,days_outstanding:41,stage:'denied',outreach_status:'denial-coding',denial_code:'CO-4',denial_category:'Coding error',partial_paid:null,comms:[{date:'2026-06-01',type:'ai',text:'First follow-up sent',sub:'Template 1'},{date:'2026-06-10',type:'payor',text:'Denial received via RPA portal scrape',sub:'Denial code CO-4: Service inconsistent with modifier. Extracted automatically.'},{date:'2026-06-10',type:'ai',text:'AI classified denial — coding error',sub:'Corrected claim drafted automatically. Modifier 95 added.'}],msg_type:'denial',msg:'Dear Medicaid FL Claims Department,\n\nWe are resubmitting claim CLM-4087 for services rendered on 2026-05-05. The original claim was denied with reason code CO-4 (service inconsistent with modifier).\n\nWe have corrected the procedure modifier (Modifier 95 — telehealth service) and are resubmitting for reconsideration.\n\nGrow Therapy Billing Team'},{id:'CLM-3991',provider_name:'Dr. Amelia Torres',payor_name:'Cigna',payor_type:'835',amount:390,days_outstanding:58,stage:'denied',outreach_status:'denial-docs',denial_code:'CO-97',denial_category:'Missing documentation',partial_paid:null,comms:[{date:'2026-05-19',type:'ai',text:'First follow-up sent',sub:'Template 1'},{date:'2026-06-02',type:'payor',text:'Denial received via 835 remittance file',sub:'Denial code CO-97: Session notes required.'},{date:'2026-06-02',type:'ai',text:'AI classified denial — missing documentation',sub:'Documentation request drafted and sent automatically.'}],msg_type:'denial',msg:'Dear Cigna Claims Department,\n\nIn response to the denial of claim CLM-3991 (denial code CO-97), we are providing the requested session documentation.\n\nAttached: Clinical session notes for DOS 2026-04-18, confirming this service was rendered independently.\n\nPlease reconsider this claim for payment upon review.\n\nGrow Therapy Billing Team'},{id:'CLM-3854',provider_name:'Dr. Kevin Park',payor_name:'Humana',payor_type:'835',amount:520,days_outstanding:44,stage:'denied',outreach_status:'denial-partial',denial_code:'PR-1',denial_category:'Partial — deductible',partial_paid:180,comms:[{date:'2026-06-03',type:'payor',text:'Partial payment received via 835 file — $180 of $520',sub:'PR-1: Patient deductible. $340 remaining balance.'},{date:'2026-06-03',type:'ai',text:'AI sent reconciliation request to Humana',sub:'Requests EOB detail to confirm $340 disposition.'},{date:'2026-06-03',type:'human',text:'Flagged for human review',sub:'Human to determine: collect from patient, write off, or resubmit secondary.'}],msg_type:'partial',msg:'Dear Humana Claims Department,\n\nWe received a partial payment of $180.00 for claim CLM-3854 (billed amount: $520.00). A balance of $340.00 remains outstanding.\n\nPlease provide the applicable EOB or remittance detail so we can determine the correct disposition of the remaining balance.\n\nGrow Therapy Billing Team'},{id:'CLM-3701',provider_name:'Dr. Rachel Kim',payor_name:'Aetna',payor_type:'api',amount:890,days_outstanding:94,stage:'escalated',outreach_status:'escalated',denial_code:'CO-50',denial_category:'Complex — non-covered',partial_paid:null,comms:[{date:'2026-03-25',type:'ai',text:'First follow-up sent',sub:'Template 1'},{date:'2026-04-08',type:'ai',text:'Second follow-up sent',sub:'Template 2'},{date:'2026-04-22',type:'ai',text:'Third follow-up sent',sub:'Template 3 — prompt payment law cited'},{date:'2026-05-10',type:'payor',text:'Denial received via Aetna API',sub:'CO-50: Non-covered service. Complex denial.'},{date:'2026-05-11',type:'human',text:'Escalated to human queue — $890 at risk',sub:'Appeal viability assessment required.'}],msg_type:'appeal',msg:'Dear Aetna Appeals Department,\n\nWe are filing a formal appeal for claim CLM-3701 (DOS: 2026-02-21, billed amount: $890.00), denied with reason code CO-50.\n\n[HUMAN TO COMPLETE: Clinical rationale, policy language being appealed, supporting documentation]\n\nWe respectfully request reconsideration and a written response within 30 days.\n\nGrow Therapy Billing Team\n\n⚠ DRAFT — requires human review before submission'},{id:'CLM-3612',provider_name:'Dr. Sarah Chen',payor_name:'Small Regional PPO',payor_type:'manual',amount:240,days_outstanding:78,stage:'escalated',outreach_status:'escalated-manual',denial_code:null,denial_category:null,partial_paid:null,comms:[{date:'2026-04-15',type:'ai',text:'First follow-up sent',sub:'Template 1'},{date:'2026-04-29',type:'ai',text:'Second follow-up sent',sub:'Template 2'},{date:'2026-05-13',type:'ai',text:'Third follow-up sent',sub:'Template 3'},{date:'2026-05-14',type:'human',text:'Flagged: payor portal not queryable',sub:'Small Regional PPO has no 835 feed, no API, no viable RPA path.'}],msg_type:'f3',msg:'Dear Small Regional PPO Claims Department,\n\nClaim CLM-3612 has been outstanding for 78 days. This is our third follow-up with no response received.\n\nPlease provide immediate claim status. If this claim has not been received, please advise on your preferred resubmission method.\n\nGrow Therapy Billing Team'}];
+const TASKS=[{priority:'high',title:'CLM-3701 — Dr. Rachel Kim / Aetna — $890',meta:'94 days outstanding · CO-50 denial · Complex non-covered service',action:'Appeal viability assessment required. AI drafted framework but cannot determine whether this service qualifies under Aetna current coverage policy. Review clinical notes and decide whether to file.'},{priority:'high',title:'CLM-3854 — Dr. Kevin Park / Humana — $340 balance',meta:'Partial payment received · PR-1 deductible · Human disposition required',action:'$180 paid, $340 remaining. Determine whether to: (1) bill patient for deductible balance, (2) check for secondary insurance, or (3) write off.'},{priority:'high',title:'CLM-3612 — Dr. Sarah Chen / Small Regional PPO — $240',meta:'78 days outstanding · No queryable portal · Manual check required',action:'This payor has no 835 feed, API, or RPA path. Manual portal login required to check claim status.'},{priority:'med',title:'CLM-4198 — Dr. Priya Nair / United Healthcare — $415',meta:'67 days outstanding · 3 AI follow-ups sent · No response',action:'AI outreach sequence complete. Direct phone call to UHC provider services line recommended.'},{priority:'med',title:'CLM-3991 — Dr. Amelia Torres / Cigna — $390',meta:'Documentation request sent · Awaiting notes from provider',action:'Confirm Dr. Torres has submitted session notes. Follow up with provider if not received within 3 days.'},{priority:'low',title:'Denial pattern review — CO-4 coding errors (6 claims)',meta:'Monthly audit · Billing quality signal',action:'6 CO-4 denials this month — all for telehealth modifier errors. Possible systematic billing configuration issue.'},{priority:'low',title:'Payor coverage expansion — RPA candidates',meta:'3 payors identified with no current automation',action:'3 payors currently in manual queue may be viable for RPA. Engineering scoping call recommended.'}];
+const STAGE_ORDER={waiting:0,followup:1,denied:2,escalated:3};
+const STAGE_LABEL={waiting:'Waiting',followup:'In follow-up',denied:'Denied',escalated:'Escalated'};
+const STAGE_BADGE={waiting:'b-blue',followup:'b-yellow',denied:'b-orange',escalated:'b-red'};
+const OUT_LABEL={'followup1':'1st follow-up sent','followup2':'2nd follow-up sent','followup3':'3rd follow-up sent','denial-coding':'Denial → coding fix drafted','denial-docs':'Denial → doc request sent','denial-partial':'Partial → reconciliation sent','escalated':'Escalated to human','escalated-manual':'Manual check needed'};
+const OUT_BADGE={'followup1':'b-blue','followup2':'b-yellow','followup3':'b-orange','denial-coding':'b-green','denial-docs':'b-green','denial-partial':'b-purple','escalated':'b-red','escalated-manual':'b-red'};
+let stage='all',sk='days_outstanding',asc=false,chartsInit=false;
+function switchTab(t,el){document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));document.querySelectorAll('.page').forEach(x=>x.classList.remove('active'));el.classList.add('active');document.getElementById('page-'+t).classList.add('active');if(t==='tasks')renderTasks();if(t==='trends'&&!chartsInit){setTimeout(initCharts,50);chartsInit=true;}}
+function fmt(n){return'$'+n.toLocaleString();}
+function setStage(s){stage=s;document.querySelectorAll('.tile').forEach(x=>x.classList.remove('active'));document.getElementById('tile-'+s).classList.add('active');document.getElementById('drawer').style.display='none';render();}
+function sort(k){if(sk===k)asc=!asc;else{sk=k;asc=true;}render();}
+function counts(){const c={waiting:0,followup:0,denied:0,escalated:0};const v={waiting:0,followup:0,denied:0,escalated:0};let t=0,tv=0;CLAIMS.forEach(cl=>{c[cl.stage]++;v[cl.stage]+=cl.amount;t++;tv+=cl.amount;});document.getElementById('cnt-all').textContent=fmt(tv);document.getElementById('sub-all').textContent=t+' claims';['waiting','followup','denied','escalated'].forEach(s=>{document.getElementById('cnt-'+s).textContent=fmt(v[s]);document.getElementById('sub-'+s).textContent=c[s]+' claim'+(c[s]!==1?'s':'');});}
+function filtered(){const q=document.getElementById('search').value.toLowerCase();return CLAIMS.filter(cl=>{const ms=stage==='all'||cl.stage===stage;const mq=!q||cl.id.toLowerCase().includes(q)||cl.provider_name.toLowerCase().includes(q)||cl.payor_name.toLowerCase().includes(q);return ms&&mq;}).sort((a,b)=>{let av=a[sk],bv=b[sk];if(sk==='stage'){av=STAGE_ORDER[a.stage];bv=STAGE_ORDER[b.stage];}if(typeof av==='string')return asc?av.localeCompare(bv):bv.localeCompare(av);return asc?(av??0)-(bv??0):(bv??0)-(av??0);});}
+function render(){counts();const rows=filtered();const tb=document.getElementById('tbody');if(!rows.length){tb.innerHTML='<tr><td colspan="7" style="text-align:center;padding:2rem;color:#888780;font-size:13px;">No claims match this filter.</td></tr>';return;}tb.innerHTML=rows.map(cl=>{const ds=cl.days_outstanding>60?'color:#A32D2D;font-weight:500':cl.days_outstanding>45?'color:#D85A30;font-weight:500':'';const ob=OUT_BADGE[cl.outreach_status]||'b-blue';const ol=OUT_LABEL[cl.outreach_status]||cl.outreach_status;return'<tr onclick="showDrawer(\''+cl.id+'\')"><td>'+cl.id+'</td><td title="'+cl.provider_name+'">'+cl.provider_name+'</td><td title="'+cl.payor_name+'">'+cl.payor_name+'</td><td style="font-weight:500">'+fmt(cl.amount)+'</td><td><span style="'+ds+'">'+cl.days_outstanding+'d</span></td><td><span class="badge '+STAGE_BADGE[cl.stage]+'">'+STAGE_LABEL[cl.stage]+'</span></td><td><span class="badge '+ob+'" style="font-size:10px">'+ol+'</span></td></tr>';}).join('');}
+function showDrawer(id){const cl=CLAIMS.find(x=>x.id===id);if(!cl)return;const d=document.getElementById('drawer');const isEsc=cl.stage==='escalated';const isPartial=cl.partial_paid!==null;const isAppeal=cl.msg_type==='appeal';const tlHtml=cl.comms.map(c=>'<div class="tl-item '+(c.type==='ai'?'tl-ai':c.type==='payor'?'tl-payor':c.type==='human'?'tl-human':'tl-danger')+'"><div class="tl-date">'+c.date+'</div><div class="tl-text">'+c.text+(c.type==='ai'?'<span class="tl-tag tag-ai">AI</span>':'')+(c.type==='payor'?'<span class="tl-tag tag-payor">payor data</span>':'')+(c.type==='human'?'<span class="tl-tag tag-human">human</span>':'')+'</div>'+(c.sub?'<div class="tl-sub">'+c.sub+'</div>':'')+'</div>').join('');const denialHtml=cl.denial_code?'<div class="denial-card"><h4>Denial classification</h4><div class="denial-row"><div class="denial-key">Denial code</div><div class="denial-val">'+cl.denial_code+'</div></div><div class="denial-row"><div class="denial-key">Category</div><div class="denial-val">'+cl.denial_category+'</div></div><div class="denial-row"><div class="denial-key">Resolution path</div><div class="denial-val">'+(cl.denial_category==='Coding error'?'Corrected claim drafted automatically':cl.denial_category==='Missing documentation'?'Documentation request sent automatically':cl.denial_category==='Partial — deductible'?'Reconciliation request sent — human to determine disposition':'Appeal framework drafted — human review required')+'</div></div></div>':'';const msgClass={f1:'msg-f1',f2:'msg-f2',f3:'msg-f3',denial:'msg-denial',partial:'msg-partial',appeal:'msg-appeal'}[cl.msg_type]||'msg-f1';const msgLabel={f1:'Template 1 — first follow-up (neutral)',f2:'Template 2 — second follow-up (firmer)',f3:'Template 3 — third follow-up (prompt payment law)',denial:'AI-generated correction / resubmission',partial:'Template — partial payment reconciliation',appeal:'AI-drafted appeal framework (human review required)'}[cl.msg_type]||'';d.style.display='block';d.innerHTML='<div class="drawer"><div class="drawer-head"><div><h3>'+cl.id+' — '+cl.payor_name+'</h3></div><button class="close-btn" onclick="document.getElementById(\'drawer\').style.display=\'none\'">✕</button></div><div class="drawer-meta">'+cl.provider_name+' · Billed: '+fmt(cl.amount)+' · '+cl.days_outstanding+' days outstanding'+(cl.partial_paid?' · $'+cl.partial_paid+' received, $'+(cl.amount-cl.partial_paid)+' balance':'')+'</div>'+(isEsc?'<div class="alert alert-danger">Escalated — requires human action. Full context assembled below.</div>':'')+(isPartial?'<div class="alert alert-warn">Partial payment received. Human to determine disposition of $'+(cl.amount-cl.partial_paid)+' balance.</div>':'')+(isAppeal?'<div class="alert alert-ai">Complex denial — AI drafted appeal framework but viability requires human judgment before submission.</div>':'')+'<div class="stats-row"><div class="stat"><div class="stat-label">Amount at risk</div><div class="stat-val" style="color:#A32D2D;font-size:16px">'+fmt(cl.amount)+'</div></div><div class="stat"><div class="stat-label">Days outstanding</div><div class="stat-val">'+cl.days_outstanding+'d</div></div><div class="stat"><div class="stat-label">AI follow-ups sent</div><div class="stat-val">'+cl.comms.filter(c=>c.type==='ai').length+'</div></div><div class="stat"><div class="stat-label">Payor data source</div><div class="stat-val">'+({api:'Portal API','835':'835 file',rpa:'RPA',manual:'Manual'}[cl.payor_type])+'</div></div></div>'+denialHtml+'<div class="two-col"><div><div class="sec-label">AI activity timeline</div><div class="timeline">'+tlHtml+'</div></div><div><div class="sec-label">Draft outreach — '+msgLabel+'</div><div class="msg-box '+msgClass+'">'+cl.msg+'</div></div></div></div>';d.scrollIntoView({behavior:'smooth',block:'nearest'});}
+function renderTasks(){document.getElementById('task-list').innerHTML=TASKS.map(t=>'<div class="task-card '+(t.priority==='high'?'p-high':t.priority==='med'?'p-med':'p-low')+'"><div class="task-head"><div class="task-title">'+t.title+'</div><span class="badge '+(t.priority==='high'?'b-red':t.priority==='med'?'b-orange':'b-yellow')+'">'+(t.priority==='high'?'High priority':t.priority==='med'?'Medium':'Low')+'</span></div><div class="task-meta">'+t.meta+'</div><div class="task-action">'+t.action+'</div></div>').join('');}
+function initCharts(){const opts={responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{grid:{display:false},ticks:{font:{size:11}}},y:{grid:{color:'rgba(0,0,0,0.06)'},ticks:{font:{size:11}}}}};new Chart(document.getElementById('c1'),{type:'bar',data:{labels:['Jan','Feb','Mar','Apr','May','Jun'],datasets:[{data:[214000,228000,241000,259000,271000,287000],backgroundColor:'rgba(59,109,17,0.7)',borderColor:'#3B6D11',borderWidth:1}]},options:{...opts,scales:{...opts.scales,y:{...opts.scales.y,ticks:{font:{size:11},callback:v=>'$'+(v/1000)+'K'}}}}});new Chart(document.getElementById('c2'),{type:'line',data:{labels:['Jan','Feb','Mar','Apr','May','Jun'],datasets:[{data:[61,72,81,89,95,98],borderColor:'#185FA5',backgroundColor:'rgba(24,95,165,0.08)',fill:true,tension:0.4,pointRadius:4,pointBackgroundColor:'#185FA5'}]},options:{...opts,scales:{...opts.scales,y:{...opts.scales.y,min:50,max:100,ticks:{font:{size:11},callback:v=>v+'%'}}}}});new Chart(document.getElementById('c3'),{type:'line',data:{labels:['Jan','Feb','Mar','Apr','May','Jun'],datasets:[{label:'Resubmission success %',data:[54,58,62,65,68,71],borderColor:'#3B6D11',fill:false,tension:0.4,pointRadius:4,yAxisID:'y'},{label:'Denial rate %',data:[14,14,15,16,16,17],borderColor:'#D85A30',fill:false,tension:0.4,pointRadius:4,yAxisID:'y1'}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{font:{size:11},boxWidth:12}}},scales:{x:{grid:{display:false},ticks:{font:{size:11}}},y:{min:40,max:80,grid:{color:'rgba(0,0,0,0.06)'},ticks:{font:{size:11},callback:v=>v+'%'}},y1:{position:'right',min:0,max:30,grid:{display:false},ticks:{font:{size:11},callback:v=>v+'%'}}}}});new Chart(document.getElementById('c4'),{type:'bar',data:{labels:['Jan','Feb','Mar','Apr','May','Jun'],datasets:[{label:'Claims processed',data:[820,940,1080,1220,1380,1560],backgroundColor:'rgba(24,95,165,0.15)',borderColor:'#185FA5',borderWidth:1,yAxisID:'y'},{label:'Human queue',data:[12,10,9,8,8,7],borderColor:'#A32D2D',backgroundColor:'rgba(163,45,45,0.7)',borderWidth:1,type:'line',pointRadius:4,yAxisID:'y1'}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{font:{size:11},boxWidth:12}}},scales:{x:{grid:{display:false},ticks:{font:{size:11}}},y:{min:0,grid:{color:'rgba(0,0,0,0.06)'},ticks:{font:{size:11}}},y1:{position:'right',min:0,max:20,grid:{display:false},ticks:{font:{size:11},callback:v=>v+' tasks'}}}}});}
+counts();render();
+</script>
+</body>
+</html>
